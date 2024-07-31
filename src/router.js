@@ -24,42 +24,47 @@ export default class VueRouter {
   static NavigationFailureType: any
   static START_LOCATION: Route
 
-  app: any
-  apps: Array<any>
-  ready: boolean
-  readyCbs: Array<Function>
-  options: RouterOptions
-  mode: string
-  history: HashHistory | HTML5History | AbstractHistory
-  matcher: Matcher
-  fallback: boolean
-  beforeHooks: Array<?NavigationGuard>
-  resolveHooks: Array<?NavigationGuard>
-  afterHooks: Array<?AfterNavigationHook>
+  app: any // 当前的Vue应用实例
+  apps: Array<any> // 存储所有的使用该路由器的Vue应用实例
+  ready: boolean // 是否已经准备好
+  readyCbs: Array<Function> // 保存ready 回调函数的数组
+  options: RouterOptions // 路由配置选项
+  mode: string // 路由模式
+  history: HashHistory | HTML5History | AbstractHistory // 存储和管理历史记录的实例
+  matcher: Matcher // 路由匹配器
+  fallback: boolean // 是否降级为hash模式
+  beforeHooks: Array<?NavigationGuard> // 全局的导航前置守卫
+  resolveHooks: Array<?NavigationGuard> // 解析守卫
+  afterHooks: Array<?AfterNavigationHook> // 全局的后置守卫
 
   constructor (options: RouterOptions = {}) {
+    // 只能使用new调用
     if (process.env.NODE_ENV !== 'production') {
       warn(this instanceof VueRouter, `Router must be called with the new operator.`)
     }
-    this.app = null
-    this.apps = []
+    // 初始化各种实例属性
+    this.app = null 
+    this.apps = [] 
     this.options = options
     this.beforeHooks = []
     this.resolveHooks = []
     this.afterHooks = []
-    this.matcher = createMatcher(options.routes || [], this)
+    this.matcher = createMatcher(options.routes || [], this)  // 创建路由匹配器
 
-    let mode = options.mode || 'hash'
-    this.fallback =
-      mode === 'history' && !supportsPushState && options.fallback !== false
+    let mode = options.mode || 'hash' // 路由模式默认是hash模式
+    this.fallback = mode === 'history' && !supportsPushState && options.fallback !== false // history模式是否降级为hash模式
+    
+    // 如果不支持history模式，则配置的history模式降级为hash模式
     if (this.fallback) {
       mode = 'hash'
     }
+    // 非浏览器端（如服务端渲染）则设置成abstract模式
     if (!inBrowser) {
       mode = 'abstract'
     }
-    this.mode = mode
+    this.mode = mode // 设置最终的路由模式
 
+    // 根据不同的模式创建对应的history实例
     switch (mode) {
       case 'history':
         this.history = new HTML5History(this, options.base)
@@ -283,12 +288,13 @@ function createHref (base: string, fullPath: string, mode) {
 }
 
 // We cannot remove this as it would be a breaking change
-VueRouter.install = install
-VueRouter.version = '__VERSION__'
-VueRouter.isNavigationFailure = isNavigationFailure
-VueRouter.NavigationFailureType = NavigationFailureType
-VueRouter.START_LOCATION = START
+VueRouter.install = install // 安装插件的方法
+VueRouter.version = '__VERSION__' // 版本号，构建时会被替换
+VueRouter.isNavigationFailure = isNavigationFailure // 判断是否导航失败的方法
+VueRouter.NavigationFailureType = NavigationFailureType // 导航失败的类型
+VueRouter.START_LOCATION = START // 起始路径对象
 
+// 自动安装
 if (inBrowser && window.Vue) {
   window.Vue.use(VueRouter)
 }
