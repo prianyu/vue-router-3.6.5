@@ -15,29 +15,40 @@ export type Matcher = {
   addRoute: (parentNameOrRoute: string | RouteConfig, route?: RouteConfig) => void;
   getRoutes: () => Array<RouteRecord>;
 };
-
+// 创建路由匹配器
+// 1. 创建pathList,pathMap，nameMap相关的路由映射对象
+// 2. 返回一个包含addRoute, addRoutes, getRoutes和match方法的对象用于管理路由
 export function createMatcher (
   routes: Array<RouteConfig>,
   router: VueRouter
 ): Matcher {
   // 创建路由映射对象
   const { pathList, pathMap, nameMap } = createRouteMap(routes)
-  console.log(pathList, pathMap, nameMap)
+  // console.log(pathList, pathMap, nameMap)
 
+  // 添加多个路由
   function addRoutes (routes) {
     createRouteMap(routes, pathList, pathMap, nameMap)
   }
 
+  /**
+   *  添加路由记录
+   * @param {string | RouteConfig} parentOrRoute 父级路由的name或者要添加的路由配置
+   * @param {RouteConfig} route 路由配置
+   */
   function addRoute (parentOrRoute, route) {
+    // 获取父级路由，当第一个参数不是RouteConfig时则认为是父级路由的名称
     const parent = (typeof parentOrRoute !== 'object') ? nameMap[parentOrRoute] : undefined
     // $flow-disable-line
+    // 创建/修改pathList, pathMap, nameMap
     createRouteMap([route || parentOrRoute], pathList, pathMap, nameMap, parent)
 
     // add aliases of parent
+    // 如果有父级路由且父路由有别名路由，则创建子路由的别名路由
     if (parent && parent.alias.length) {
       createRouteMap(
         // $flow-disable-line route is defined if parent is
-        parent.alias.map(alias => ({ path: alias, children: [route] })),
+        parent.alias.map(alias => ({ path: alias, children: [route] })), // 遍历所有的别名并添加
         pathList,
         pathMap,
         nameMap,
@@ -46,6 +57,8 @@ export function createMatcher (
     }
   }
 
+  // 获取路由列表
+  // 根据路由路径列表从路由映射表中获取后返回
   function getRoutes () {
     return pathList.map(path => pathMap[path])
   }

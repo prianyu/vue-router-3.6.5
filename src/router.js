@@ -43,13 +43,16 @@ export default class VueRouter {
       warn(this instanceof VueRouter, `Router must be called with the new operator.`)
     }
     // 初始化各种实例属性
-    this.app = null 
-    this.apps = [] 
+    this.app = null
+    this.apps = []
     this.options = options
     this.beforeHooks = []
     this.resolveHooks = []
     this.afterHooks = []
-    this.matcher = createMatcher(options.routes || [], this)  // 创建路由匹配器
+    // 创建路由匹配器
+    // 会根据路由配置在内部创建pathList/pathMap/nameMap
+    // 返回一个可以匹配、操作这些对象的对象
+    this.matcher = createMatcher(options.routes || [], this)
 
     let mode = options.mode || 'hash' // 路由模式默认是hash模式
     this.fallback = mode === 'history' && !supportsPushState && options.fallback !== false // history模式是否降级为hash模式

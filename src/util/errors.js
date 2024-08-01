@@ -77,6 +77,8 @@ export function isError (err) {
   return Object.prototype.toString.call(err).indexOf('Error') > -1
 }
 
+// 判断某个错误对象是否是来自路由器的错误
+// 具有_isRouter属性且type为指定的类型
 export function isNavigationFailure (err, errorType) {
   return (
     isError(err) &&

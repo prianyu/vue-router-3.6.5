@@ -30,8 +30,8 @@ export function install (Vue) {
       if (isDef(this.$options.router)) { // 配置了router选项
         this._routerRoot = this // 保存当前实例到_routerRoot属性
         this._router = this.$options.router // 保存router实例到_router属性
-         // 初始化router实例
-         // 将当前实例添加到路由的应用列表、添加路由事件监听、处理滚动等
+        // 初始化router实例
+        // 将当前实例添加到路由的应用列表、添加路由事件监听、处理滚动等
         this._router.init(this)
         // 在Vue实例上添加响应式属性_route，其初始值是router实例的当前路由属性
         Vue.util.defineReactive(this, '_route', this._router.history.current)
