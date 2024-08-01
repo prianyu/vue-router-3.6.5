@@ -69,6 +69,7 @@ export function parsePath (path: string): {
   }
 }
 
+// 清理路径，将路径中多余的斜杠和斜杠间的空格移除，替换为单/
 export function cleanPath (path: string): string {
   return path.replace(/\/(?:\s*\/)+/g, '/')
 }

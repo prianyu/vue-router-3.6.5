@@ -20,7 +20,9 @@ export function createMatcher (
   routes: Array<RouteConfig>,
   router: VueRouter
 ): Matcher {
+  // 创建路由映射对象
   const { pathList, pathMap, nameMap } = createRouteMap(routes)
+  console.log(pathList, pathMap, nameMap)
 
   function addRoutes (routes) {
     createRouteMap(routes, pathList, pathMap, nameMap)

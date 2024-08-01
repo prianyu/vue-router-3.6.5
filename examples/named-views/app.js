@@ -26,11 +26,13 @@ const router = new VueRouter({
         default: Baz,
         a: Bar,
         b: Foo
+      },
+      beforeEnter: (to, from, next) => {
+        next()
       }
     }
   ]
 })
-
 new Vue({
   router,
   template: `

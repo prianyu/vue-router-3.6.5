@@ -58,7 +58,7 @@ export default class VueRouter {
     if (this.fallback) {
       mode = 'hash'
     }
-    // 非浏览器端（如服务端渲染）则设置成abstract模式
+    // 非浏览器端（如服务端渲染）则强制设置成abstract模式
     if (!inBrowser) {
       mode = 'abstract'
     }
@@ -86,11 +86,14 @@ export default class VueRouter {
     return this.matcher.match(raw, current, redirectedFrom)
   }
 
+  // currentRoute属性，指向history.current属性
   get currentRoute (): ?Route {
     return this.history && this.history.current
   }
 
+  // 路由初始化，在组件的beforeCreate钩子中调用
   init (app: any /* Vue component instance */) {
+    // 未安装提示
     process.env.NODE_ENV !== 'production' &&
       assert(
         install.installed,
@@ -98,45 +101,56 @@ export default class VueRouter {
           `before creating root instance.`
       )
 
+    // 往apps添加当前根组件实例
     this.apps.push(app)
 
+    // 当应用实例已经销毁时，释放与之关联的路由资源
     // set up app destroyed handler
     // https://github.com/vuejs/vue-router/issues/2639
     app.$once('hook:destroyed', () => {
       // clean out app from this.apps array once destroyed
+      // 查找对应的应用实例并从apps中移除
       const index = this.apps.indexOf(app)
       if (index > -1) this.apps.splice(index, 1)
       // ensure we still have a main app or null if no apps
       // we do not release the router so it can be reused
+      // 确保仍然有一个主应用或在没有主应用时时将其设置为null
       if (this.app === app) this.app = this.apps[0] || null
 
+      // 如果没有主应用了，则释放history
       if (!this.app) this.history.teardown()
     })
 
     // main app previously initialized
     // return as we don't need to set up new history listener
+    // 主应用已经初始化过了，则无需再设置新的历史记录监听器
     if (this.app) {
       return
     }
 
+    // 设置主应用
     this.app = app
 
     const history = this.history
 
+    // 在history模式和hash模式下，初始化时，需要处理滚动行为
+    // 注：AbstractHistory不涉及浏览器的实际导航和滚动行为
     if (history instanceof HTML5History || history instanceof HashHistory) {
-      const handleInitialScroll = routeOrError => {
-        const from = history.current
-        const expectScroll = this.options.scrollBehavior
-        const supportsScroll = supportsPushState && expectScroll
+      const handleInitialScroll = routeOrError => { // 接收路由或者错误对象
+        const from = history.current // 获取当前路由
+        const expectScroll = this.options.scrollBehavior // 滚动行为配置
+        const supportsScroll = supportsPushState && expectScroll // 是否支持pushState且定义了滚动行为
 
+        // 如果支持pushState且定义了滚动行为，则执行滚动行为
         if (supportsScroll && 'fullPath' in routeOrError) {
           handleScroll(this, routeOrError, from, false)
         }
       }
       const setupListeners = routeOrError => {
-        history.setupListeners()
-        handleInitialScroll(routeOrError)
+        history.setupListeners() // 设置相关的事件监听
+        handleInitialScroll(routeOrError) // 处理初始的滚动
       }
+      // 导航至当前的路由
       history.transitionTo(
         history.getCurrentLocation(),
         setupListeners,
@@ -144,21 +158,28 @@ export default class VueRouter {
       )
     }
 
+    // 监听路由变化，并通知所有应用实例
+    // app._route属性是在根实例的beforeCreate钩子中为根实例添加的一个响应式属性
+    // 其初始值为history.current属性
     history.listen(route => {
+      // 遍历应用，修改_route属性
       this.apps.forEach(app => {
         app._route = route
       })
     })
   }
 
+  // 注册全局的前置守卫，往beforeHooks添加回调
   beforeEach (fn: Function): Function {
     return registerHook(this.beforeHooks, fn)
   }
 
+  // 注册解析守卫
   beforeResolve (fn: Function): Function {
     return registerHook(this.resolveHooks, fn)
   }
 
+  // 注册全局的后置守卫
   afterEach (fn: Function): Function {
     return registerHook(this.afterHooks, fn)
   }
@@ -193,6 +214,7 @@ export default class VueRouter {
     }
   }
 
+  // 跳转到指定的路由位置
   go (n: number) {
     this.history.go(n)
   }
@@ -274,6 +296,8 @@ export default class VueRouter {
   }
 }
 
+// 注册钩子函数
+// 将回调函数添加到指定的钩子存储数组后，返回一个移除钩子的函数
 function registerHook (list: Array<any>, fn: Function): Function {
   list.push(fn)
   return () => {

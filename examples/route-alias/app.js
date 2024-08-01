@@ -16,7 +16,7 @@ const router = new VueRouter({
   mode: 'history',
   base: __dirname,
   routes: [
-    { path: '/root', component: Root, alias: '/root-alias' },
+    { path: '/root/:id/:id', component: Root, alias: '/root-alias', name: 'root' },
     { path: '/home', component: Home,
       children: [
         // absolute alias
