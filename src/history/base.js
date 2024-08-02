@@ -219,7 +219,7 @@ export class History {
       // in-config enter guards
       activated.map(m => m.beforeEnter), // 激活路由的独享进入守卫 beforeEnter
       // async components
-      resolveAsyncComponents(activated) // 异步组件解析
+      resolveAsyncComponents(activated) // 激活的异步组件解析
     )
 
     // 迭代器函数，用于执行守卫函数
