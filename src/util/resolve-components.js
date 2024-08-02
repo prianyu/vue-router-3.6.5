@@ -70,19 +70,23 @@ export function resolveAsyncComponents (matched: Array<RouteRecord>): Function {
   }
 }
 
+// 遍历路由中的组件，对每个组件应用给定的处理函数，将处理结果返回的数组扁平化后返回
 export function flatMapComponents (
   matched: Array<RouteRecord>,
   fn: Function
 ): Array<?Function> {
   return flatten(matched.map(m => {
+    // 遍历命名视图中的所有组件
+    // 对每个组件应用给定的处理函数
     return Object.keys(m.components).map(key => fn(
-      m.components[key],
-      m.instances[key],
-      m, key
+      m.components[key], // 路由配置的component构造函数
+      m.instances[key], // 对应的组件实例
+      m, key // 当前记录和组件的key（如default、sidebar等）
     ))
   }))
 }
 
+// 将二维数组拍平为一维数组
 export function flatten (arr: Array<any>): Array<any> {
   return Array.prototype.concat.apply([], arr)
 }

@@ -69,5 +69,6 @@ export function install (Vue) {
   // use the same hook merging strategy for route hooks
   // 添加路由钩子合并策略为与created合并策略相同
   // Vue created默认的合并策略是合并成数组并顺序执行
+  // 这里会涉及到后续提取组件的导航守卫时的扁平化处理逻辑
   strats.beforeRouteEnter = strats.beforeRouteLeave = strats.beforeRouteUpdate = strats.created
 }

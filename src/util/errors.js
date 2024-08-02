@@ -73,6 +73,7 @@ function stringifyRoute (to) {
   return JSON.stringify(location, null, 2)
 }
 
+// 判断传入的内容是否为错误对象
 export function isError (err) {
   return Object.prototype.toString.call(err).indexOf('Error') > -1
 }
