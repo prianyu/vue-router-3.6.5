@@ -85,16 +85,22 @@ export class HTML5History extends History {
   }
 }
 
+
+// 返回当前页面地址相对与base的路径
 export function getLocation (base: string): string {
-  let path = window.location.pathname
+  let path = window.location.pathname // 当前页面的path
+  // 将path和base都转为小写用于比较
   const pathLowerCase = path.toLowerCase()
   const baseLowerCase = base.toLowerCase()
   // base="/a" shouldn't turn path="/app" into "/a/pp"
   // https://github.com/vuejs/vue-router/issues/3555
   // so we ensure the trailing slash in the base
+  // 确保在比较时base末尾包含/，以避免误匹配，如base=”/b"时，path="/app"被转为'/a/pp
   if (base && ((pathLowerCase === baseLowerCase) ||
     (pathLowerCase.indexOf(cleanPath(baseLowerCase + '/')) === 0))) {
+    // 路径与基路径相同或以基路径开透时，则从路径中移除基路径部分
     path = path.slice(base.length)
   }
+  // 加上查询字符串和hash值，返回处理后的路径
   return (path || '/') + window.location.search + window.location.hash
 }
