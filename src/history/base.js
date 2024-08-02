@@ -302,7 +302,6 @@ export class History {
     })
   }
 
-
   // 更新当前路由并执行路由更新的监听回调
   updateRoute (route: Route) {
     this.current = route
