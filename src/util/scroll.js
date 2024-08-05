@@ -65,10 +65,10 @@ export function handleScroll (
     const position = getScrollPosition() // 获取记录的位置信息
     // 调用定义的行为函数，接收返回值
     const shouldScroll = behavior.call(
-      router,
-      to,
-      from,
-      isPop ? position : null
+      router, // 当前路由实例
+      to, // 目标路由
+      from, // 当前路由
+      isPop ? position : null // 位置信息，仅在支持popstate时生效
     )
 
     // 范围值为falsy则不做处理

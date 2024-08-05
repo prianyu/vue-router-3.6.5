@@ -60,10 +60,12 @@ export class HashHistory extends History {
     }
     // 监听的事件类型
     const eventType = supportsPushState ? 'popstate' : 'hashchange'
+    // 监听事件
     window.addEventListener(
       eventType,
       handleRoutingEvent
     )
+    // 添加监听器清理函数
     this.listeners.push(() => {
       window.removeEventListener(eventType, handleRoutingEvent)
     })
@@ -82,7 +84,6 @@ export class HashHistory extends History {
       onAbort // 中断回调
     )
   }
-
 
   replace (location: RawLocation, onComplete?: Function, onAbort?: Function) {
     const { current: fromRoute } = this // 当前路由

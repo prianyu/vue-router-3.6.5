@@ -7,6 +7,7 @@ import { START } from '../util/route'
 import { setupScroll, handleScroll } from '../util/scroll'
 import { pushState, replaceState, supportsPushState } from '../util/push-state'
 
+// 基于History API的的历史记录管理类
 export class HTML5History extends History {
   _startLocation: string
 
@@ -16,8 +17,9 @@ export class HTML5History extends History {
     this._startLocation = getLocation(this.base)
   }
 
+  // 设置监听事件
   setupListeners () {
-    if (this.listeners.length > 0) {
+    if (this.listeners.length > 0) { // 已经有监听器
       return
     }
 
@@ -25,6 +27,7 @@ export class HTML5History extends History {
     const expectScroll = router.options.scrollBehavior
     const supportsScroll = supportsPushState && expectScroll
 
+    // 支持滚动行为设置
     if (supportsScroll) {
       this.listeners.push(setupScroll())
     }
@@ -34,45 +37,53 @@ export class HTML5History extends History {
 
       // Avoiding first `popstate` event dispatched in some browsers but first
       // history route not updated since async guard at the same time.
+      // 避免在有些浏览器下第一次加载时触发popstate事件带来的问题
       const location = getLocation(this.base)
-      if (this.current === START && location === this._startLocation) {
+      if (this.current === START && location === this._startLocation) { // 第一次加载
         return
       }
 
+      // 执行过渡
       this.transitionTo(location, route => {
-        if (supportsScroll) {
+        if (supportsScroll) { // 处理滚动
           handleScroll(router, route, current, true)
         }
       })
     }
+    // 监听popstate事件，并添加监听器清理函数
     window.addEventListener('popstate', handleRoutingEvent)
     this.listeners.push(() => {
       window.removeEventListener('popstate', handleRoutingEvent)
     })
   }
 
+  // 跳转到指定的路由
   go (n: number) {
     window.history.go(n)
   }
 
+  // 导航到一个新页面
   push (location: RawLocation, onComplete?: Function, onAbort?: Function) {
     const { current: fromRoute } = this
     this.transitionTo(location, route => {
-      pushState(cleanPath(this.base + route.fullPath))
-      handleScroll(this.router, route, fromRoute, false)
-      onComplete && onComplete(route)
+      pushState(cleanPath(this.base + route.fullPath)) // 跳转到目标path
+      handleScroll(this.router, route, fromRoute, false) // 处理滚动
+      onComplete && onComplete(route) // 完成回调
     }, onAbort)
   }
 
+  // 替换当前页面
   replace (location: RawLocation, onComplete?: Function, onAbort?: Function) {
     const { current: fromRoute } = this
     this.transitionTo(location, route => {
       replaceState(cleanPath(this.base + route.fullPath))
-      handleScroll(this.router, route, fromRoute, false)
-      onComplete && onComplete(route)
+      handleScroll(this.router, route, fromRoute, false) // 处理滚动
+      onComplete && onComplete(route) // 完成回调
     }, onAbort)
   }
 
+
+  // 确保当前的URL与路由的fullPath相同
   ensureURL (push?: boolean) {
     if (getLocation(this.base) !== this.current.fullPath) {
       const current = cleanPath(this.base + this.current.fullPath)
@@ -80,11 +91,11 @@ export class HTML5History extends History {
     }
   }
 
+  // 获取相对与base的URL
   getCurrentLocation (): string {
     return getLocation(this.base)
   }
 }
-
 
 // 返回当前页面地址相对与base的路径
 export function getLocation (base: string): string {

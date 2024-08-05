@@ -144,16 +144,18 @@ export default class VueRouter {
         const expectScroll = this.options.scrollBehavior // 滚动行为配置
         const supportsScroll = supportsPushState && expectScroll // 是否支持pushState且定义了滚动行为
 
-        // 如果支持pushState且定义了滚动行为，则执行滚动行为
+        // 如果支持pushState且定义了滚动行为且完成路由过渡则执行滚动行为
         if (supportsScroll && 'fullPath' in routeOrError) {
           handleScroll(this, routeOrError, from, false)
         }
       }
       const setupListeners = routeOrError => {
-        history.setupListeners() // 设置相关的事件监听
+        history.setupListeners() // 设置对应history模式下相关的事件监听
         handleInitialScroll(routeOrError) // 处理初始的滚动
       }
       // 导航至当前的路由
+      // 导航完成或者中断后都设置URL监听函数
+      // 处理初始的滚动
       history.transitionTo(
         history.getCurrentLocation(),
         setupListeners,
@@ -186,15 +188,17 @@ export default class VueRouter {
   afterEach (fn: Function): Function {
     return registerHook(this.afterHooks, fn)
   }
-
+  // 注册一个路由初始导航完成时的回调，errorCb在初始化路由解析运行出错（比如解析异步组件失败）时执行
   onReady (cb: Function, errorCb?: Function) {
     this.history.onReady(cb, errorCb)
   }
-
+ // 注册一个错误回调，注册的回调在路由导航过程中发生错误时被调用
   onError (errorCb: Function) {
     this.history.onError(errorCb)
   }
 
+  // 导航到一个新的路由
+  // 如果没有传入onComplete和onAbort，则会返回一个Promise，Promise在导航完成后resolve，导航中断时reject
   push (location: RawLocation, onComplete?: Function, onAbort?: Function) {
     // $flow-disable-line
     if (!onComplete && !onAbort && typeof Promise !== 'undefined') {
@@ -206,6 +210,8 @@ export default class VueRouter {
     }
   }
 
+  // 替换当前路由为新的路由
+  // 如果没有传入onComplete和onAbort，则会返回一个Promise，Promise在导航完成后resolve，导航中断时reject
   replace (location: RawLocation, onComplete?: Function, onAbort?: Function) {
     // $flow-disable-line
     if (!onComplete && !onAbort && typeof Promise !== 'undefined') {
