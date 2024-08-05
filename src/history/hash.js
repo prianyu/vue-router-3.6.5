@@ -19,39 +19,46 @@ export class HashHistory extends History {
     }
 
     // 不是history模式回退到hash模式，或者history模式本身已经已/#开头则会走这个逻辑
-    // 确保
+    // 确保浏览器URL的hash值以/开头
     ensureSlash()
   }
 
   // this is delayed until the app mounts
   // to avoid the hashchange listener being fired too early
   setupListeners () {
-    if (this.listeners.length > 0) {
+    if (this.listeners.length > 0) { // 已经有监听器
       return
     }
 
     const router = this.router
-    const expectScroll = router.options.scrollBehavior
-    const supportsScroll = supportsPushState && expectScroll
+    const expectScroll = router.options.scrollBehavior // 滚动行为的配置
+    const supportsScroll = supportsPushState && expectScroll // 支持pushState且配置了滚动行为
 
+    // 支持pushState且配置了滚动行为
     if (supportsScroll) {
       this.listeners.push(setupScroll())
     }
 
+    // 定义路由监听事件处理函数
     const handleRoutingEvent = () => {
-      const current = this.current
-      if (!ensureSlash()) {
+      const current = this.current // 获取当前路由
+      // 变化后的hash值不是以/开头时（此时会使用replace重新替换为新的路径，会再次进入该函数）
+      // 则不处理（由replace后的新的处理逻辑来处理）
+      if (!ensureSlash()) { 
         return
       }
+      // 执行路由过渡过渡
       this.transitionTo(getHash(), route => {
-        if (supportsScroll) {
+        if (supportsScroll) { // 处理滚动行为，并指示当前路由变化是因为popstate事件引起的
           handleScroll(this.router, route, current, true)
         }
+        // 不支持pushState，手动更新hash部分
         if (!supportsPushState) {
           replaceHash(route.fullPath)
         }
       })
     }
+    // 监听的事件类型
     const eventType = supportsPushState ? 'popstate' : 'hashchange'
     window.addEventListener(
       eventType,
@@ -63,42 +70,48 @@ export class HashHistory extends History {
   }
 
   push (location: RawLocation, onComplete?: Function, onAbort?: Function) {
-    const { current: fromRoute } = this
+    const { current: fromRoute } = this // 当前路由
+    // 执行路由过渡
     this.transitionTo(
       location,
-      route => {
-        pushHash(route.fullPath)
-        handleScroll(this.router, route, fromRoute, false)
-        onComplete && onComplete(route)
+      route => { // 成功回调
+        pushHash(route.fullPath) // 浏览器历史记录压入一个新的记录
+        handleScroll(this.router, route, fromRoute, false) // 处理滚动
+        onComplete && onComplete(route) // 过渡完成回调
       },
-      onAbort
+      onAbort // 中断回调
     )
   }
+
 
   replace (location: RawLocation, onComplete?: Function, onAbort?: Function) {
-    const { current: fromRoute } = this
+    const { current: fromRoute } = this // 当前路由
     this.transitionTo(
       location,
       route => {
-        replaceHash(route.fullPath)
-        handleScroll(this.router, route, fromRoute, false)
-        onComplete && onComplete(route)
+        replaceHash(route.fullPath) // 替换当前历史记录到目标path
+        handleScroll(this.router, route, fromRoute, false) // 处理滚动
+        onComplete && onComplete(route) // 过渡完成回调
       },
       onAbort
     )
   }
 
+  // 跳转到指定位置
   go (n: number) {
     window.history.go(n)
   }
 
+  // 确保当前URL的hash部分与应用程序的路由状态一致
   ensureURL (push?: boolean) {
     const current = this.current.fullPath
     if (getHash() !== current) {
+      // 添加或替换为新的path
       push ? pushHash(current) : replaceHash(current)
     }
   }
 
+  // 获取当前的URL，返回hash部分（不含#）
   getCurrentLocation () {
     return getHash()
   }
@@ -114,18 +127,19 @@ function checkFallback (base) {
   }
 }
 
+// 确保URL的hash值以/开头，如果不是则重定向到hash值为以/开头的地址
 function ensureSlash (): boolean {
   const path = getHash() // 获取hash值（不含#）
   if (path.charAt(0) === '/') {
   // 如果hash值以/开头，说明已经是一个基于hash模式的路径： 如xxx.com/base/#/a/b/c => /a/b/c
-    return true
+    return true // 返回标识路径已经是以/开头
   }
-  // 不是/开头的hash值
+  // 不是/开头的hash值，重定向到hash模式的URL
   replaceHash('/' + path)
-  return false
+  return false // 返回路径不是以/开头
 }
 
-// 提取当前URL中的hash部分
+// 提取当前URL中的hash部分，不含#
 export function getHash (): string {
   // We can't use window.location.hash here because it's not
   // consistent across browsers - Firefox will pre-decode it!
@@ -142,7 +156,7 @@ export function getHash (): string {
   return href
 }
 
-// 根据path创建一个包含完成的路径以及基于hash模式的URL
+// 根据path创建一个包含由基路径和基于hash模式的path组成的完整的URL
 function getUrl (path) {
   const href = window.location.href
   const i = href.indexOf('#')
@@ -150,6 +164,7 @@ function getUrl (path) {
   return `${base}#${path}`
 }
 
+// 浏览器push一个新的URL
 function pushHash (path) {
   if (supportsPushState) {
     pushState(getUrl(path))
