@@ -7,6 +7,7 @@ import { extend } from './misc'
 
 const positionStore = Object.create(null) // 用于存储位置信息的对象
 
+// 设置popstate监听器处理滚动行为
 export function setupScroll () {
   // Prevent browser scroll behavior on History popstate
   // 阻止浏览器自动恢复页面位置的行为
