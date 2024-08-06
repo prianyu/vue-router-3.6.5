@@ -5,45 +5,52 @@ import { stringifyQuery } from './query'
 
 const trailingSlashRE = /\/?$/
 
+// 创建路由对象（Route）
 export function createRoute (
-  record: ?RouteRecord,
-  location: Location,
-  redirectedFrom?: ?Location,
-  router?: VueRouter
+  record: ?RouteRecord, // 匹配到的路由记录
+  location: Location, // 当前的位置对象，包含path，query，hash等信息
+  redirectedFrom?: ?Location, // 从哪个位置重定向而来的
+  router?: VueRouter // 路由器实例
 ): Route {
+  // 获取查询字符串反解析函数
   const stringifyQuery = router && router.options.stringifyQuery
 
-  let query: any = location.query || {}
+  // 拷贝生成查询对象
+  let query: any = location.query || {} 
   try {
     query = clone(query)
   } catch (e) {}
 
+  // 构建路由对象
   const route: Route = {
-    name: location.name || (record && record.name),
-    meta: (record && record.meta) || {},
-    path: location.path || '/',
-    hash: location.hash || '',
-    query,
-    params: location.params || {},
-    fullPath: getFullPath(location, stringifyQuery),
-    matched: record ? formatMatch(record) : []
+    name: location.name || (record && record.name), // 路由名称
+    meta: (record && record.meta) || {}, // 路由元信息
+    path: location.path || '/', // 路径
+    hash: location.hash || '', // 哈希值
+    query, // 查询对象
+    params: location.params || {}, // 参数对象
+    fullPath: getFullPath(location, stringifyQuery), // 完整路径，参数对象转字符串后和hash拼接在路径后面
+    matched: record ? formatMatch(record) : [] // 从当前路由到根路由的所有路由记录数组
   }
+  // 重定向来源的完整的路径
   if (redirectedFrom) {
     route.redirectedFrom = getFullPath(redirectedFrom, stringifyQuery)
   }
+  // 返回冻结后的路由对象
   return Object.freeze(route)
 }
 
+// 深度克隆对象
 function clone (value) {
-  if (Array.isArray(value)) {
+  if (Array.isArray(value)) { // 数组，遍历并递归克隆
     return value.map(clone)
-  } else if (value && typeof value === 'object') {
+  } else if (value && typeof value === 'object') { // 对象，遍历并递归克隆
     const res = {}
     for (const key in value) {
       res[key] = clone(value[key])
     }
     return res
-  } else {
+  } else { // 原始类型直接返回
     return value
   }
 }
@@ -53,21 +60,24 @@ export const START = createRoute(null, {
   path: '/'
 })
 
+// 获取从当前路由到根路由的所有路由组成的记录
+// 顺序是从根到叶
 function formatMatch (record: ?RouteRecord): Array<RouteRecord> {
   const res = []
-  while (record) {
-    res.unshift(record)
-    record = record.parent
+  while (record) { // 从当前路由记录开始循环一直遍历到根路由记录
+    res.unshift(record) // 将遍历到的路由记录压入到结果的开头
+    record = record.parent // 继续往上走
   }
   return res
 }
 
+// 根据传入的位置信息获取完整的路径
 function getFullPath (
   { path, query = {}, hash = '' },
   _stringifyQuery
 ): string {
-  const stringify = _stringifyQuery || stringifyQuery
-  return (path || '/') + stringify(query) + hash
+  const stringify = _stringifyQuery || stringifyQuery // 参数字符串话的处理函数
+  return (path || '/') + stringify(query) + hash // 将path、query、hash拼接后返回
 }
 
 /**

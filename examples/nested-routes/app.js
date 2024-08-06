@@ -108,3 +108,5 @@ new Vue({
     </div>
   `
 }).$mount('#app')
+
+console.log(router)

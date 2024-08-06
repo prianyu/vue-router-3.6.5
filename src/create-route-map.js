@@ -118,7 +118,7 @@ function addRouteRecord (
     instances: {}, // 用于存储命名视图的组件实例
     enteredCbs: {}, // @suspense
     name, // 命名路由的路由名称
-    parent, // 父路由
+    parent, // 父路由，在生成匹配路由的matched数组时会使用该属性逐级向上查找生成匹配的嵌套路由数组
     matchAs, // 路由指向的实际路由路径
     redirect: route.redirect, // 路由跳转
     beforeEnter: route.beforeEnter, // 路由前置守卫
