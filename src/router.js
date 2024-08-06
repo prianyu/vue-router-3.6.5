@@ -85,6 +85,7 @@ export default class VueRouter {
     }
   }
 
+  // 路由匹配方法，返回匹配结果（Route对象）
   match (raw: RawLocation, current?: Route, redirectedFrom?: Location): Route {
     return this.matcher.match(raw, current, redirectedFrom)
   }
@@ -192,7 +193,7 @@ export default class VueRouter {
   onReady (cb: Function, errorCb?: Function) {
     this.history.onReady(cb, errorCb)
   }
- // 注册一个错误回调，注册的回调在路由导航过程中发生错误时被调用
+  // 注册一个错误回调，注册的回调在路由导航过程中发生错误时被调用
   onError (errorCb: Function) {
     this.history.onError(errorCb)
   }
@@ -228,23 +229,31 @@ export default class VueRouter {
     this.history.go(n)
   }
 
+  // 后退
   back () {
     this.go(-1)
   }
 
+  // 前进
   forward () {
     this.go(1)
   }
 
+  // 获取目标位置或当前路由匹配的组件数组
+  // 获取到的是组件的定义/构造类，不是组件实例
+  // 通常在服务端渲染的数据预加载时使用
   getMatchedComponents (to?: RawLocation | Route): Array<any> {
     const route: any = to
       ? to.matched
-        ? to
-        : this.resolve(to).route
-      : this.currentRoute
-    if (!route) {
+        ? to // 本身已经是个路由对象且有matched属性，则直接使用
+        : this.resolve(to).route // 传入了to但是不是路由对象，则先解析
+      : this.currentRoute // 没有传入to，则使用当前路由
+    if (!route) { // route不存在则返回空数组
       return []
     }
+    // 遍历route.matched数组中的每一个路由记录
+    // 获取每个路由记录中的components(命名视图组件
+    // 返回扁平化后的组件数组
     return [].concat.apply(
       [],
       route.matched.map(m => {
@@ -255,10 +264,12 @@ export default class VueRouter {
     )
   }
 
+  // 解析给定的目标位置，返回一个包含匹配的完整的路由信息对象
+  // 该方法可以用于在不实际导航到指定路由的情况下，获取目标路由的相关信息
   resolve (
-    to: RawLocation,
-    current?: Route,
-    append?: boolean
+    to: RawLocation, // 目标位置
+    current?: Route, // 当前的路由对象，默认是当前路由状态
+    append?: boolean // 是否将目标位置追加到当前路径之后
   ): {
     location: Location,
     route: Route,
@@ -268,37 +279,46 @@ export default class VueRouter {
     resolved: Route
   } {
     current = current || this.history.current
+    // 获取标准化的目标位置对象： {path, query, hash, name, params, append}
     const location = normalizeLocation(to, current, append, this)
-    const route = this.match(location, current)
+    const route = this.match(location, current)   // 路由匹配结果
     const fullPath = route.redirectedFrom || route.fullPath
     const base = this.history.base
+    // 基于基路径和目标路径生成href，href可用作链接
     const href = createHref(base, fullPath, this.mode)
     return {
       location,
       route,
       href,
       // for backwards compat
+      // 向后兼容的属性
       normalizedTo: location,
       resolved: route
     }
   }
-
+  // 获取所有活跃的路由记录列表
   getRoutes () {
     return this.matcher.getRoutes()
   }
 
+  // 动态添加路由配置，添加至指定或者现有路由的子路由
   addRoute (parentOrRoute: string | RouteConfig, route?: RouteConfig) {
-    this.matcher.addRoute(parentOrRoute, route)
-    if (this.history.current !== START) {
+    this.matcher.addRoute(parentOrRoute, route) // 添加路由规则
+    // 如果当前路由不是初始路由，则使用当前位置进行一次导航
+    // 以便触发相应的钩子函数和更新视图
+    if (this.history.current !== START) { 
       this.history.transitionTo(this.history.getCurrentLocation())
     }
   }
 
+  // 动态添加更多的路由规则
   addRoutes (routes: Array<RouteConfig>) {
+    // vue-router 4开始移除了addRoutes方法，使用router.addRoute代替
     if (process.env.NODE_ENV !== 'production') {
       warn(false, 'router.addRoutes() is deprecated and has been removed in Vue Router 4. Use router.addRoute() instead.')
     }
-    this.matcher.addRoutes(routes)
+    this.matcher.addRoutes(routes) // 添加路由规则
+    //  如果当前路由不是初始路由，则使用当前位置进行一次导航
     if (this.history.current !== START) {
       this.history.transitionTo(this.history.getCurrentLocation())
     }
@@ -315,9 +335,10 @@ function registerHook (list: Array<any>, fn: Function): Function {
   }
 }
 
+// 创建完整的URL链接
 function createHref (base: string, fullPath: string, mode) {
-  var path = mode === 'hash' ? '#' + fullPath : fullPath
-  return base ? cleanPath(base + '/' + path) : path
+  var path = mode === 'hash' ? '#' + fullPath : fullPath // 路由的完整路径
+  return base ? cleanPath(base + '/' + path) : path // 拼接完整的路径
 }
 
 // We cannot remove this as it would be a breaking change
