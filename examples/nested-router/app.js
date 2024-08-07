@@ -36,7 +36,7 @@ const router = new VueRouter({
   ]
 })
 
-new Vue({
+const instance = new Vue({
   router,
   template: `
     <div id="app">
@@ -46,7 +46,8 @@ new Vue({
         <li><router-link to="/foo">/foo</router-link></li>
         <li><router-link to="/bar">/bar</router-link></li>
       </ul>
-      <router-view></router-view>
+      <router-view>阿斯顿噶时光</router-view>
     </div>
   `
 }).$mount('#app')
+console.log(instance)

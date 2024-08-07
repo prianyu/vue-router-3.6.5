@@ -18,7 +18,11 @@ export function install (Vue) {
   // 注册路由实例
   const registerInstance = (vm, callVal) => {
     let i = vm.$options._parentVnode // 父虚拟节点
-    // 如果父虚拟节点上有registerRouteInstance属性（RouterView组件），则调用该方法
+    // 如果父虚拟节点上有registerRouteInstance方法（RouterView组件），则调用该方法进行实例注册
+    // registerRouteInstance方法是RouterView组件定义在data上的方法，用于注册和销毁vue实例组件
+    // 该方法接收两个参数（vm, val) 
+    // 当vm与当前路由匹配到的实例不一致则将当前设置成val（注册）
+    // 当vm与当前路由匹配到的实例一致，且val为undefined也将当前设置成val（销毁）
     if (isDef(i) && isDef(i = i.data) && isDef(i = i.registerRouteInstance)) {
       i(vm, callVal)
     }
@@ -42,10 +46,10 @@ export function install (Vue) {
         // 所以这里会逐级向上查找，直到找到_routerRoot属性
         this._routerRoot = (this.$parent && this.$parent._routerRoot) || this
       }
-      // 注册路由实例
+      // 注册路由实例，将router-view组件与当前实例进行关联
       registerInstance(this, this)
     },
-    destroyed () {
+    destroyed () { // 从路由匹配实例中移除当前的实例，取消与router-view组件的关联
       registerInstance(this)
     }
   })

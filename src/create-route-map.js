@@ -115,7 +115,7 @@ function addRouteRecord (
         ? [route.alias]
         : route.alias
       : [], // 路由别名
-    instances: {}, // 用于存储命名视图的组件实例
+    instances: {}, // 用于存储命名视图的组件实例，没有使用命名视图的会被转为instances.default
     enteredCbs: {}, // @suspense
     name, // 命名路由的路由名称
     parent, // 父路由，在生成匹配路由的matched数组时会使用该属性逐级向上查找生成匹配的嵌套路由数组

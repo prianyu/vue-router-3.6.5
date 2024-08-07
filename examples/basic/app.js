@@ -113,3 +113,4 @@ document.getElementById('unmount').addEventListener('click', () => {
   vueInstance.$destroy()
   vueInstance.$el.innerHTML = ''
 })
+console.log(vueInstance)
