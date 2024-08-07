@@ -7,7 +7,7 @@ import { fillParams } from './params'
 import { warn } from './warn'
 import { extend } from './misc'
 
-// 标准化路由位置信息
+// 标准化路由位置信息，返回包含{path, hash, query, _normalized}等属性的对象
 export function normalizeLocation (
   raw: RawLocation, // 原始的路由位置信息，可以是字符串或对象
   current: ?Route, // 当前的路由信息

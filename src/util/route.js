@@ -144,13 +144,16 @@ function isObjectEqual (a = {}, b = {}): boolean {
   })
 }
 
+// 判断当前路由是否包含了目标路由
+// 如果当前路由的path是以目标路由开头，且当前路由的query包含了目标路由的query，
+// 同时如果目标的hash为空或者与当前路由的hash值相同则返回true
 export function isIncludedRoute (current: Route, target: Route): boolean {
   return (
     current.path.replace(trailingSlashRE, '/').indexOf(
       target.path.replace(trailingSlashRE, '/')
-    ) === 0 &&
-    (!target.hash || current.hash === target.hash) &&
-    queryIncludes(current.query, target.query)
+    ) === 0 && // 当前路由path是以目标路由path开头
+    (!target.hash || current.hash === target.hash) && // 目标路由没有hash或者两者的hash相同
+    queryIncludes(current.query, target.query) // 当前路由的query包含了所有目标路由的query
   )
 }
 

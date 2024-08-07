@@ -266,6 +266,7 @@ export default class VueRouter {
 
   // 解析给定的目标位置，返回一个包含匹配的完整的路由信息对象
   // 该方法可以用于在不实际导航到指定路由的情况下，获取目标路由的相关信息
+  // 比如router-link组件会使用此方法解析获取要跳转的目标路由的信息
   resolve (
     to: RawLocation, // 目标位置
     current?: Route, // 当前的路由对象，默认是当前路由状态
