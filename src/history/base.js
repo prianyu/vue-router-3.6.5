@@ -217,7 +217,7 @@ export class History {
       // in-component update hooks
       extractUpdateHooks(updated), // 复用组件的更新守卫 beforeRouteUpdate
       // in-config enter guards
-      activated.map(m => m.beforeEnter), // 激活路由的独享进入守卫 beforeEnter
+      activated.map(m => m.beforeEnter), // 激活路由配置里的独享进入守卫 beforeEnter
       // async components
       resolveAsyncComponents(activated) // 激活的异步组件解析
     )
@@ -277,7 +277,7 @@ export class History {
       // 等异步组件路由组件解析完成后再开始执行组件内部的进入守卫
       // wait until async components are resolved before
       // extracting in-component enter guards
-      const enterGuards = extractEnterGuards(activated) // 提取激活组件的beforeRouteEnter守卫
+      const enterGuards = extractEnterGuards(activated) // 提取激活组件内部的beforeRouteEnter守卫
       const queue = enterGuards.concat(this.router.resolveHooks) // 提取全局解析守卫beforeResolve拼接在后面
 
       // 执行全局的beforeRouteEnter和beforeResolve守卫

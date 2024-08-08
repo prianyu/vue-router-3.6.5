@@ -20,7 +20,7 @@ export function install (Vue) {
     let i = vm.$options._parentVnode // 父虚拟节点
     // 如果父虚拟节点上有registerRouteInstance方法（RouterView组件），则调用该方法进行实例注册
     // registerRouteInstance方法是RouterView组件定义在data上的方法，用于注册和销毁vue实例组件
-    // 该方法接收两个参数（vm, val) 
+    // 该方法接收两个参数（vm, val)
     // 当vm与当前路由匹配到的实例不一致则将当前设置成val（注册）
     // 当vm与当前路由匹配到的实例一致，且val为undefined也将当前设置成val（销毁）
     if (isDef(i) && isDef(i = i.data) && isDef(i = i.registerRouteInstance)) {
@@ -28,19 +28,19 @@ export function install (Vue) {
     }
   }
 
-  // 混入钩子
+  // 混入beforeCreate钩子和destroyed钩子
   Vue.mixin({
     beforeCreate () {
-      if (isDef(this.$options.router)) { // 配置了router选项
+      if (isDef(this.$options.router)) { // 配置了router选项的路由根组件
         this._routerRoot = this // 保存当前实例到_routerRoot属性
         this._router = this.$options.router // 保存router实例到_router属性
         // 初始化router实例
         // 将当前实例添加到路由的应用列表、添加路由事件监听、处理滚动等
         this._router.init(this)
-        // 在Vue实例上添加响应式属性_route，其初始值是router实例的当前路由属性
+        // 在Vue实例上添加响应式属性_route，其初始值是router实例的当前历史记录所在的位置
+        // 该属性在路由发生变化时会更新，从而触发组件的更新，重新渲染页面
         Vue.util.defineReactive(this, '_route', this._router.history.current)
-      } else {
-        // 没有传入router选项（如子组件）
+      } else { // 没有传入router选项的非路由根组件
         // 添加_routeRoot属性，如果当前实例没有父实例，则指向当前实例本身，否则指向父实例的_routerRoot属性
         // 由于beforeCreate钩子的执行是先执行父组件的钩子，再执行子组件的钩子
         // 所以这里会逐级向上查找，直到找到_routerRoot属性

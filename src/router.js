@@ -17,7 +17,7 @@ import { AbstractHistory } from './history/abstract'
 
 import type { Matcher } from './create-matcher'
 
-export default class VueRouter {
+export default class VueRouter { 
   static install: () => void
   static version: string
   static isNavigationFailure: Function

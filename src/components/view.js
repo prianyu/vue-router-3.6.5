@@ -12,6 +12,7 @@ export default {
     }
   },
   render (_, { props, children, parent, data }) {
+    // -----------上下文初始化和处理----------------
     // used by devtools to display a router-view badge
     data.routerView = true // 给devtool使用的标记，也被用来计算深度
 
@@ -24,6 +25,8 @@ export default {
     const route = parent.$route // 当前路由，当路由更新时，会触发该值改变从而触发router-view组件重新渲染
     // 用于缓存已渲染的组件，用于在keep-alive被激活时取出缓存的组件
     const cache = parent._routerViewCache || (parent._routerViewCache = {}) 
+
+    // ------------计算当前router-view组件的嵌套深度-------------------
 
     // determine current view depth, also check to see if the tree
     // has been toggled inactive but kept-alive.
@@ -47,6 +50,8 @@ export default {
     // 记录最后的深度
     data.routerViewDepth = depth
 
+    // -------------keep-alive包裹下的渲染逻辑------------------
+
     // render previous view if the tree is inactive and kept-alive
     // 组件处于失活状态，则从缓存中获取组件并渲染
     if (inactive) {
@@ -65,6 +70,7 @@ export default {
       }
     }
 
+    // ----------------- 普通的渲染逻辑-----------------------
     const matched = route.matched[depth] // 获取匹配到的路由
     const component = matched && matched.components[name] // 根据视图命名（默认是default）获取匹配到的路由组件
 
@@ -77,6 +83,8 @@ export default {
 
     // cache component 缓存获取到的路由
     cache[name] = { component }
+
+    // --------------VNode钩子定义------------------
 
     // attach instance registration hook
     // this will be called in the instance's injected lifecycle hooks
