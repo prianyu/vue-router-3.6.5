@@ -177,8 +177,8 @@ export function handleRouteEntered (route: Route) {
       if (!instance || !cbs) continue
       // 由于每次调用beforeRouteEnter都会存储enteredCbs，所以调用后要删除
       // 详情见：src/history/base/bindEnterGuard
-      delete record.enteredCbs[name] 
-      for (let i = 0; i < cbs.length; i++) { 
+      delete record.enteredCbs[name]
+      for (let i = 0; i < cbs.length; i++) {
         // 遍历所有回调，如果实例未被销毁，则传入当前实例并执行回调
         if (!instance._isBeingDestroyed) cbs[i](instance)
       }
