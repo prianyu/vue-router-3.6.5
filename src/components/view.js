@@ -42,6 +42,7 @@ export default {
         depth++
       }
       // 如果父组件处理keep-alive且已经是失活状态
+      // _directInactive代表组件是被直接被设置成失活的，而不是其父组件被设置成失活
       if (vnodeData.keepAlive && parent._directInactive && parent._inactive) {
         inactive = true // 标记当前RouteView组件为失活的
       }
@@ -104,7 +105,7 @@ export default {
 
     // also register instance in prepatch hook
     // in case the same component instance is reused across different routes
-    // 当相同的组件在不同的路由之间服用时，也为路由记录绑定组件实例
+    // 当相同的组件在不同的路由之间复用时，也为路由记录绑定组件实例
     // 在data.hook.prepatch钩子中注册实例，该钩子在VNode更新前调用，接收旧VNode和新VNode两个参数
     // 该钩子在虚拟节点更新之前调用
     // _:旧的虚拟节点 vnode新的虚拟节点
@@ -127,6 +128,7 @@ export default {
       // if the route transition has already been confirmed then we weren't
       // able to call the cbs during confirmation as the component was not
       // registered yet, so we call it here.
+      // @suspense
       handleRouteEntered(route)
     }
 

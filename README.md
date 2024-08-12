@@ -179,3 +179,49 @@ interface Location {
 + `onError`： 实际调用的是`history.onError`，注册路由导航过程中出现错误时的回调函数，多次注册会被处理成一个数组并按顺序执行
 
 ![VueRouter-instance](./images/router.png)
+
+## 导航执行流程
+
+在VueRouter中，路由的导航包含初始化时的初始导航、使用`RouterLink`组件导航以及编程式的导航（如`router.push`）、浏览器URL前进后退监听的导航。无论哪一种导航，其最终都是调用了`router.history`实例属性上的`transitionTo`方法执行导航，调用`router.history`实例属性上的`confirmTransition`方法确认导航。其大致的流程如下：
+
++ 执行`transitionTo`方法，首先根据传入的目标位置尝试调用`router.match`方法获取目标路由记录`route`，如果成功则执行下一步，否则，执行`onError`注册的错误回调函数，并则抛出错误。
++ 将`route`传入`confirmTransition`方法，确认导航执行：
+  + 获取当前路由并与目标路由进行对比，如果相同则确保浏览器的地址正确并处理滚动，并创建一个重复导航的中断错误，导航中断
+  + 根据当前路由和目标路由，提取失活的路由组件、激活的路由组件以及复用（更新）的路由组件
+  + 创建路由导航守卫队列，按顺序分别提取失活组件的`beforeRouteLeave`、全局的路由前置守卫`beforeEach`、更新组件的更新守卫`beforeRouteUpdate`、激活组件的路由配置独享守卫`beforeRouteEnter`以及创建激活异步组件的解析守卫
+  + 传入目标路由对象、当前路由对象和next函数，执行创建的守卫队列，执行期间会根据next函数的传值做相应的处理，如果期间发生错误，则抛出导航中断错误
+  + 以上执行完后异步组件解析完毕，继续创建路由导航守卫队列，按顺序提取激活组件的内部的`beforeRouteEnter`守卫，获取全局的`beforeResolve`守卫
+  + 执行获取到的守卫队列
+  + 更新`_route`触发DOM更新
+  + 执行导航完成的回调，并确保浏览器的地址正确
+  + 执行全局的`afterEach`导航守卫
+  + 如果是初次导航则执行由`onReady`注册的导航完成回调
+  + DOM更新完成后(`nextTick`)，遍历匹配路由的`instances`组件实例，执行`beforeRouteEnter`守卫中，由next函数传入的回调函数
+
+  ![VueRouter-transitionTo](./images/transition.png)
+
+  ## RouterView组件
+
+  `RouterView`组件是**VueRouter**的核心组件，它负责渲染当前活跃的路由对应的组件。`RouterView`组件是一个函数式组件，其基本的原理是`render`函数依赖了`_route`属性，在路由切换时，`_route`属性会更新，从而触发`render`函数的重新执行，从而渲染新的组件。`render`函数的基本逻辑如下：
+
+  + 将组件的`data.routerView`属性标记成`true`，表示当前组件是`RouterView`组件，用于计算路由组件的层级
+  + 获取组件的上下文，包括父组件的`$createElement`函数以及组件的名称等
+  + 计算当前组件的层级，`RouterView`组件是支持嵌套路由的，通过不断的往上寻找父组件，每找到有`data.routerView`属性标记的，层级就加1，并将层级存储到`data.routerViewDepth`属性中
+  + 在遍历获取父组件的过程，会判断组件是否被包裹在`keep-alive`标签中，如果是则会设置失活标记
+  + 如果当前组件是`keep-alive`标签包裹的，则从缓存中获取组件，并传递`props`后渲染，否则指向下一步
+  + 根据获取到层级，从匹配的路由数组中（`route.matched`）找到对应的路由配置，进而获取到对应的路由组件
+  + 缓存获取到组件
+  + 定义`data.registerRouteInstance`方法用于注册和移除应用组件实例，该方法在应用组件实例的`beforeCreate`和`destroyed`钩子被调用
+  + 添加`init`和`prepatch`两个VNode钩子，保证当相同的组件在不同路由之间服用以及在keep-alive激活时，可以将实例添加到`matched.instances`中
+  + 合并并传递`props`
+  + 渲染组件
+
+  ![VueRouter-RouterView](./images/view.png)
+
+
+  ## 总结
+
+  完整的基本流程如下：
+
+  ![]()
+
