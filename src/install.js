@@ -46,7 +46,7 @@ export function install (Vue) {
         // 所以这里会逐级向上查找，直到找到_routerRoot属性
         this._routerRoot = (this.$parent && this.$parent._routerRoot) || this
       }
-      // 注册路由实例，将router-view组件与当前实例进行关联
+      // 注册当前实例到路由里，将router-view组件与当前实例进行关联
       registerInstance(this, this)
     },
     destroyed () { // 从路由匹配实例中移除当前的实例，取消与router-view组件的关联
