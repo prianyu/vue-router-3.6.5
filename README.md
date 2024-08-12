@@ -223,5 +223,6 @@ interface Location {
 
   完整的基本流程如下：
 
-  ![]()
+  ![VueRouter](./images/VueRouter.png)
 
+    
