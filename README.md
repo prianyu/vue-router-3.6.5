@@ -27,6 +27,26 @@ module.exports = {
 
 ## 目录结构
 
+```bash
+|-- components # 组件目录
+|   |-- link.js # RouterLink组件
+|   |-- view.js # RouterView组件
+|-- composables # 组合式API(Vue3)
+|-- create-matcher.js # 创建匹配器
+|-- create-route-map.js # 创建路由映射表
+|-- entries # 打包入口文件
+|-- history # history模块
+|   |-- abstract.js # 抽象history
+|   |-- base.js # 基础history
+|   |-- hash.js # hash模式history
+|   |-- html5.js # history模式的history
+|-- index.js # 根入口文件
+|-- install.js # 安装函数
+|-- router.js # VueRouter类
+|-- util # 工具函数目录
+
+```
+
 ## 几个类型和概念
 
 在vue-router中，有几个核心的数据类型对于理解和使用Vue-Router至关重要，这些类型包括：`Route`、`RouteRecord`、`RouteConfig`和`Location`。
