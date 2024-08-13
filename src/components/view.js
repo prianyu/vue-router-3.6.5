@@ -43,6 +43,9 @@ export default {
       }
       // 如果父组件处理keep-alive且已经是失活状态
       // _directInactive代表组件是被直接被设置成失活的，而不是其父组件被设置成失活
+      // 增加该条件是为了确保多级嵌套组件的正确渲染
+      // 例子：examples/keepalive-view， 如果不增加该条件，当从one/tow/child1切换到home，再切换到one/tow/child2时会渲染child1
+      // 详情见：https://github.com/vuejs/vue-router/issues/2923
       if (vnodeData.keepAlive && parent._directInactive && parent._inactive) {
         inactive = true // 标记当前RouteView组件为失活的
       }
@@ -58,6 +61,7 @@ export default {
     if (inactive) {
       const cachedData = cache[name] // 获取缓存的数据
       const cachedComponent = cachedData && cachedData.component // 获取缓存的组件
+      console.log(cachedComponent)
       if (cachedComponent) {
         // #2301
         // pass props
@@ -115,8 +119,8 @@ export default {
 
     // register instance in init hook
     // in case kept-alive component be actived when routes changed
-    // 当keep-alive组件被激活时，也需要为路由记录绑定组件
-    // data.hook.init方法在vnode被初次创建时调用
+    // 确保在keep-alive组件被激活时也能将组件实例绑定到路由记录上
+    // 修复的是这个问题：https://github.com/vuejs/vue-router/issues/2561
     data.hook.init = (vnode) => {
       if (vnode.data.keepAlive &&
         vnode.componentInstance &&
@@ -128,7 +132,10 @@ export default {
       // if the route transition has already been confirmed then we weren't
       // able to call the cbs during confirmation as the component was not
       // registered yet, so we call it here.
-      // @suspense
+      // https://github.com/vuejs/vue-router/issues/750
+      // 当结合Transition组件使用时，如果使用out-in过渡模式，有时候可能会导致传递给beforeRouteEnter中next函数的vm实例为undefined
+      // 因为out-in模式会先等待当前视图完成过渡效果离开，然后新的视图才开始进入
+      // 所以在next函数中，可能还没有注册好vm实例，所以需要手动调用handleRouteEntered函数
       handleRouteEntered(route)
     }
 

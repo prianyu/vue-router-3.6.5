@@ -1,4 +1,4 @@
-# Vue-Router 3.6.5源码解读
+# VueRouter 3.6.5源码解读
 
 ## 开发环境启动
 
@@ -212,7 +212,7 @@ interface Location {
   + 根据获取到层级，从匹配的路由数组中（`route.matched`）找到对应的路由配置，进而获取到对应的路由组件
   + 缓存获取到组件
   + 定义`data.registerRouteInstance`方法用于注册和移除应用组件实例，该方法在应用组件实例的`beforeCreate`和`destroyed`钩子被调用
-  + 添加`init`和`prepatch`两个VNode钩子，保证当相同的组件在不同路由之间服用以及在keep-alive激活时，可以将实例添加到`matched.instances`中
+  + 添加`init`和`prepatch`两个VNode钩子，保证当相同的组件在不同路由之间复用以及在keep-alive激活时，可以将实例添加到`matched.instances`中
   + 合并并传递`props`
   + 渲染组件
 
